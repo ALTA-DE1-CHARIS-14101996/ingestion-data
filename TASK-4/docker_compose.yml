@@ -1,0 +1,48 @@
+version: '3'
+
+#############################################################################
+  # Postgre
+#############################################################################
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: task4
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres_network
+
+#############################################################################
+  # Citus
+#############################################################################
+  citus_coordinator:
+    image: citusdata/citus:12.0.0
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_DB: task4
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+      CITUS_WORKER_CONNECT_STRING: "host=citus_worker port=5432 dbname=task4 user=your_username password=your_password"
+    ports:
+      - "15432:5432"
+    networks:
+      - postgres_network
+
+  citus_worker:
+    image: citusdata/citus:12.0.0
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_DB: task4
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+    networks:
+      - postgres_network
+
+networks:
+  postgres_network:
+    driver: bridge
